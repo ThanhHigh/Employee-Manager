@@ -1,6 +1,47 @@
+#VScode Frontend
 # Node
-frontend/employee-manager-frontend/node_modules/
+# Compiled output
 frontend/employee-manager-frontend/dist/
+frontend/employee-manager-frontend/tmp
+frontend/employee-manager-frontend/out-tsc
+frontend/employee-manager-frontend/bazel-out
+
+# Node
+
+frontend/employee-manager-frontend/node_modules/
+frontend/employee-manager-frontendnpm-debug.log
+frontend/employee-manager-frontendyarn-error.log
+
+# IDEs and editors
+frontend/employee-manager-frontend/.idea/
+frontend/employee-manager-frontend/.project
+frontend/employee-manager-frontend/.classpath
+frontend/employee-manager-frontend/.c9/
+frontend/employee-manager-frontend/*.launch
+frontend/employee-manager-frontend/.settings/
+frontend/employee-manager-frontend/*.sublime-workspace
+
+# Visual Studio Code
+frontend/employee-manager-frontend/.vscode/*
+frontend/employee-manager-frontend/!.vscode/settings.json
+frontend/employee-manager-frontend/!.vscode/tasks.json
+frontend/employee-manager-frontend/!.vscode/launch.json
+frontend/employee-manager-frontend/!.vscode/extensions.json
+frontend/employee-manager-frontend/.history/*
+
+# Miscellaneous
+frontend/employee-manager-frontend/.angular/cache
+frontend/employee-manager-frontend/.sass-cache/
+frontend/employee-manager-frontend/connect.lock
+frontend/employee-manager-frontend/coverage
+frontend/employee-manager-frontend/libpeerconnection.log
+frontend/employee-manager-frontend/testem.log
+frontend/employee-manager-frontend/typings
+__screenshots__/
+
+# System files
+frontend/employee-manager-frontend/.DS_Store
+frontend/employee-manager-frontend/Thumbs.db
 
 # IntelliJ
 backend/employee-manager-backend/.idea/
