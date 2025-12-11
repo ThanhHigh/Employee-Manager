@@ -1,4 +1,4 @@
-#VScode Frontend
+# ==============================FRONTEND==============================
 # Node
 # Compiled output
 frontend/employee-manager-frontend/dist/
@@ -9,8 +9,8 @@ frontend/employee-manager-frontend/bazel-out
 # Node
 
 frontend/employee-manager-frontend/node_modules/
-frontend/employee-manager-frontendnpm-debug.log
-frontend/employee-manager-frontendyarn-error.log
+frontend/employee-manager-frontend/npm-debug.log
+frontend/employee-manager-frontend/yarn-error.log
 
 # IDEs and editors
 frontend/employee-manager-frontend/.idea/
@@ -43,6 +43,8 @@ __screenshots__/
 frontend/employee-manager-frontend/.DS_Store
 frontend/employee-manager-frontend/Thumbs.db
 
+
+# ==============================BACKEND==============================
 # IntelliJ
 backend/employee-manager-backend/.idea/
 backend/employee-manager-backend/target/
