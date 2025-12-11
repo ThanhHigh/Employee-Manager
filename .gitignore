@@ -1,0 +1,10 @@
+# Node
+frontend/employee-manager-frontend/node_modules/
+frontend/employee-manager-frontend/dist/
+
+# IntelliJ
+backend/employee-manager-backend/.idea/
+backend/employee-manager-backend/target/
+
+# OS files
+.DS_Store
