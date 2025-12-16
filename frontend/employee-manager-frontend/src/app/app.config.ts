@@ -1,26 +1,37 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import Keycloak from 'keycloak-js';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
-import { environment } from '../environments/environment';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { KeycloakService } from './auth/keycloak.service';
+import { authInterceptor } from './interceptors/auth.interceptor';
+import { errorInterceptor } from './interceptors/error.interceptor';
 
-// Create a Keycloak instance so services can inject it. We do NOT
-// initialize it here to avoid blocking bootstrap when Keycloak isn't running.
-const keycloakService = new Keycloak({
-  url: environment.keycloak.url,
-  realm: environment.keycloak.realm,
-  clientId: environment.keycloak.clientId
-});
+function initializeKeycloak(keycloakService: KeycloakService) {
+  return () => {
+    return keycloakService.init().catch((error) => {
+      console.error('Keycloak initialization failed:', error);
+      // Don't block app initialization if Keycloak fails
+      return false;
+    });
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    // Make Keycloak injectable to components and services
-    { provide: Keycloak, useValue: keycloakService }
+    provideHttpClient(
+      withInterceptors([authInterceptor, errorInterceptor])
+    ),
+    KeycloakService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      multi: true,
+      deps: [KeycloakService]
+    }
   ]
 };

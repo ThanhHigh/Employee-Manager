@@ -1,29 +1,59 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import Keycloak from 'keycloak-js';
+
+export interface Employee {
+  id?: number;
+  name: string;
+  email: string;
+  phone?: string;
+  department?: string;
+  keycloakUserId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateEmployeeDTO {
+  name: string;
+  email: string;
+  phone?: string;
+  department?: string;
+  keycloakUserId?: string;
+}
+
+export interface UpdateEmployeeDTO {
+  name?: string;
+  email?: string;
+  phone?: string;
+  department?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
-  constructor(private http: HttpClient, private keycloak: Keycloak) {}
+  constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'Authorization': 'Bearer ' + this.keycloak.token,
-      'Content-Type': 'application/json'
-    });
+  getEmployees(): Observable<Employee[]> {
+    return this.http.get<Employee[]>(environment.apiUrl);
   }
 
-  getEmployees(): Observable<any> {
-    return this.http.get(environment.apiUrl, { headers: this.getHeaders() });
+  getEmployee(id: number): Observable<Employee> {
+    return this.http.get<Employee>(`${environment.apiUrl}/${id}`);
   }
 
-  createEmployee(employee: any): Observable<any> {
-    return this.http.post(environment.apiUrl, employee, { headers: this.getHeaders() });
+  getOwnProfile(): Observable<Employee> {
+    return this.http.get<Employee>(`${environment.apiUrl}/profile`);
   }
 
-  deleteEmployee(id: number): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/${id}`, { headers: this.getHeaders() });
+  createEmployee(employee: CreateEmployeeDTO): Observable<Employee> {
+    return this.http.post<Employee>(environment.apiUrl, employee);
+  }
+
+  updateEmployee(id: number, employee: UpdateEmployeeDTO): Observable<Employee> {
+    return this.http.put<Employee>(`${environment.apiUrl}/${id}`, employee);
+  }
+
+  deleteEmployee(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/${id}`);
   }
 }
