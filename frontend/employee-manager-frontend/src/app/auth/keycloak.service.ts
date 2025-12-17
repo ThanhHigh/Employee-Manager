@@ -21,12 +21,23 @@ export class KeycloakService {
 
   init(): Promise<boolean> {
     if (!this.isBrowser || !this.keycloak) {
+      console.warn('Keycloak init skipped - not in browser or keycloak is null');
       return Promise.resolve(false);
     }
     try {
+      console.log('Initializing Keycloak with config:', {
+        url: environment.keycloak.url,
+        realm: environment.keycloak.realm,
+        clientId: environment.keycloak.clientId
+      });
+      
       return this.keycloak.init({
         onLoad: 'login-required',
-        silentCheckSsoRedirectUri: window.location.origin + '/assets/silent-check-sso.html'
+        checkLoginIframe: false
+      }).then((authenticated) => {
+        console.log('Keycloak initialized. Authenticated:', authenticated);
+        console.log('Token:', this.keycloak?.token ? 'EXISTS' : 'MISSING');
+        return authenticated;
       }).catch((error) => {
         console.error('Keycloak initialization error:', error);
         // Return false to allow app to continue loading even if Keycloak fails

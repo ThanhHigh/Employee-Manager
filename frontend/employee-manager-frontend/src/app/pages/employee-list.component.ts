@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, inject, ChangeDetectorRef, afterNextRender, NgZone } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EmployeeService, Employee } from '../services/employee.service';
 import { KeycloakService } from '../auth/keycloak.service';
@@ -12,15 +12,15 @@ import { KeycloakService } from '../auth/keycloak.service';
     <div class="employee-list-container">
       <div class="header-actions">
       <h2>Employee Directory</h2>
-        <button *ngIf="canCreate()" routerLink="/employees/new" class="btn btn-primary">
+        <button *ngIf="canCreate()" [routerLink]="['/employees/new']" class="btn btn-primary">
           Add New Employee
         </button>
       </div>
 
-      <div *ngIf="loading" class="loading">Loading...</div>
+      <div *ngIf="loading" class="loading">Loading... (loading={{ loading }}, employees={{ employees.length }})</div>
       <div *ngIf="error" class="error">{{ error }}</div>
 
-      <table *ngIf="!loading && !error" class="employee-table">
+      <table *ngIf="!loading && !error && employees.length > 0" class="employee-table">
         <thead>
           <tr>
             <th>Name</th>
@@ -37,8 +37,8 @@ import { KeycloakService } from '../auth/keycloak.service';
             <td>{{ emp.phone || '-' }}</td>
             <td>{{ emp.department || '-' }}</td>
             <td>
-              <button routerLink="/employees/{{ emp.id }}" class="btn btn-sm btn-info">View</button>
-              <button *ngIf="canEdit()" routerLink="/employees/{{ emp.id }}" class="btn btn-sm btn-warning">Edit</button>
+              <button [routerLink]="['/employees', emp.id]" class="btn btn-sm btn-info">View</button>
+              <button *ngIf="canEdit()" [routerLink]="['/employees', emp.id, 'edit']" class="btn btn-sm btn-warning">Edit</button>
               <button *ngIf="canDelete()" (click)="deleteEmployee(emp.id!)" class="btn btn-sm btn-danger">Delete</button>
             </td>
           </tr>
@@ -142,30 +142,51 @@ import { KeycloakService } from '../auth/keycloak.service';
 })
 export class EmployeeListComponent implements OnInit {
   employees: Employee[] = [];
-  loading = false;
+  loading = true;
   error: string | null = null;
+  private platformId = inject(PLATFORM_ID);
+  private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
 
   constructor(
     private employeeService: EmployeeService,
     private keycloakService: KeycloakService
-  ) {}
-
-  ngOnInit() {
-    this.loadEmployees();
+  ) {
+    console.log('EmployeeListComponent: Constructor called');
+    // Load data after render to avoid hydration mismatch
+    if (isPlatformBrowser(this.platformId)) {
+      afterNextRender(() => {
+        console.log('EmployeeListComponent: afterNextRender - calling loadEmployees');
+        setTimeout(() => this.loadEmployees(), 0);
+      });
+    }
   }
 
+  ngOnInit() {
+    console.log('EmployeeListComponent: ngOnInit - loading:', this.loading, 'employees:', this.employees.length);
+  }
   loadEmployees() {
     this.loading = true;
     this.error = null;
+    console.log('EmployeeListComponent: Loading employees...');
     this.employeeService.getEmployees().subscribe({
       next: (data) => {
-        this.employees = data;
-        this.loading = false;
+        this.ngZone.run(() => {
+          console.log('EmployeeListComponent: Employees loaded:', data);
+          console.log('EmployeeListComponent: Setting employees array, length:', data.length);
+          this.employees = data;
+          this.loading = false;
+          console.log('EmployeeListComponent: State after update - loading:', this.loading, 'employees:', this.employees.length);
+          this.cdr.markForCheck();
+        });
       },
       error: (err) => {
-        this.error = 'Failed to load employees';
-        this.loading = false;
-        console.error(err);
+        this.ngZone.run(() => {
+          console.error('EmployeeListComponent: Error loading employees:', err);
+          this.error = 'Failed to load employees';
+          this.loading = false;
+          this.cdr.markForCheck();
+        });
       }
     });
   }
