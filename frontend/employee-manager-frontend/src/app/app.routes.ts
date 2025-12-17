@@ -11,12 +11,12 @@ export const routes: Routes = [
       {
         path: 'employees',
         loadComponent: () => import('./pages/employee-list.component').then(m => m.EmployeeListComponent),
-        canActivate: [roleGuard(['ADMIN', 'STAFF'])]
+        canActivate: [roleGuard(['role-admin', 'role-staff'])]
       },
       {
         path: 'employees/new',
         loadComponent: () => import('./pages/employee-form.component').then(m => m.EmployeeFormComponent),
-        canActivate: [roleGuard(['ADMIN', 'STAFF'])]
+        canActivate: [roleGuard(['role-admin', 'role-staff'])] // Chỉ admin và staff mới được tạo nhân viên mới
       },
       {
         path: 'employees/:id',
@@ -26,7 +26,7 @@ export const routes: Routes = [
       {
         path: 'employees/:id/edit',
         loadComponent: () => import('./pages/employee-form.component').then(m => m.EmployeeFormComponent),
-        canActivate: [roleGuard(['ADMIN', 'STAFF'])]
+        canActivate: [roleGuard(['role-admin', 'role-staff'])]
       },
       {
         path: 'profile',

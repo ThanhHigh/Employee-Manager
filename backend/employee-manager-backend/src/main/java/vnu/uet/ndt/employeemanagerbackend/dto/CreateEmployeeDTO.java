@@ -2,6 +2,7 @@ package vnu.uet.ndt.employeemanagerbackend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -17,6 +18,7 @@ public class CreateEmployeeDTO {
     private String email;
 
     @Size(max = 20, message = "Phone must not exceed 20 characters")
+    @Pattern(regexp = "^[0-9+\\-\\s()]*$", message = "Phone must contain only numbers, spaces, hyphens, parentheses, or plus sign")
     private String phone;
 
     @Size(max = 100, message = "Department must not exceed 100 characters")
