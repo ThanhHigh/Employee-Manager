@@ -28,6 +28,9 @@ public class Employee {
     @Column(name = "keycloak_user_id", unique = true)
     private String keycloakUserId;
 
+    @Column(name = "created_by")
+    private String createdBy;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

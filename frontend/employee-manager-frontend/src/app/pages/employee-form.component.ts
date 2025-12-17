@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { EmployeeService, CreateEmployeeDTO, UpdateEmployeeDTO } from '../services/employee.service';
 
 @Component({
@@ -22,7 +23,12 @@ import { EmployeeService, CreateEmployeeDTO, UpdateEmployeeDTO } from '../servic
             class="form-control"
             [class.is-invalid]="employeeForm.get('name')?.invalid && employeeForm.get('name')?.touched">
           <div *ngIf="employeeForm.get('name')?.invalid && employeeForm.get('name')?.touched" class="invalid-feedback">
-            Name is required and must be between 2 and 100 characters.
+            <div *ngIf="employeeForm.get('name')?.errors?.['required']">Name is required</div>
+            <div *ngIf="employeeForm.get('name')?.errors?.['minlength']">Name must be at least 2 characters</div>
+            <div *ngIf="employeeForm.get('name')?.errors?.['maxlength']">Name must not exceed 100 characters</div>
+          </div>
+          <div *ngIf="fieldErrors['name']" class="invalid-feedback">
+            <div *ngFor="let error of fieldErrors['name']">{{ error }}</div>
           </div>
         </div>
 
@@ -35,7 +41,12 @@ import { EmployeeService, CreateEmployeeDTO, UpdateEmployeeDTO } from '../servic
             class="form-control"
             [class.is-invalid]="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched">
           <div *ngIf="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" class="invalid-feedback">
-            Valid email is required.
+            <div *ngIf="employeeForm.get('email')?.errors?.['required']">Email is required</div>
+            <div *ngIf="employeeForm.get('email')?.errors?.['email']">Email must be valid</div>
+            <div *ngIf="employeeForm.get('email')?.errors?.['maxlength']">Email must not exceed 255 characters</div>
+          </div>
+          <div *ngIf="fieldErrors['email']" class="invalid-feedback">
+            <div *ngFor="let error of fieldErrors['email']">{{ error }}</div>
           </div>
         </div>
 
@@ -45,16 +56,39 @@ import { EmployeeService, CreateEmployeeDTO, UpdateEmployeeDTO } from '../servic
             id="phone" 
             type="text" 
             formControlName="phone" 
-            class="form-control">
+            class="form-control"
+            [class.is-invalid]="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched">
+          <div *ngIf="employeeForm.get('phone')?.invalid && employeeForm.get('phone')?.touched" class="invalid-feedback">
+            <div *ngIf="employeeForm.get('phone')?.errors?.['pattern']">
+              Phone must contain only numbers, spaces, hyphens, parentheses, or plus sign
+            </div>
+            <div *ngIf="employeeForm.get('phone')?.errors?.['maxlength']">
+              Phone must not exceed 20 characters
+            </div>
+          </div>
+          <div *ngIf="fieldErrors['phone']" class="invalid-feedback">
+            <div *ngFor="let error of fieldErrors['phone']">{{ error }}</div>
+          </div>
         </div>
 
         <div class="form-group">
           <label for="department">Department</label>
-          <input 
+          <select 
             id="department" 
-            type="text" 
             formControlName="department" 
-            class="form-control">
+            class="form-control"
+            [class.is-invalid]="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched">
+            <option value="">-- Select Department --</option>
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+          <div *ngIf="employeeForm.get('department')?.invalid && employeeForm.get('department')?.touched" class="invalid-feedback">
+            <div *ngIf="employeeForm.get('department')?.errors?.['maxlength']">
+              Department must not exceed 100 characters
+            </div>
+          </div>
+          <div *ngIf="fieldErrors['department']" class="invalid-feedback">
+            <div *ngFor="let error of fieldErrors['department']">{{ error }}</div>
+          </div>
         </div>
 
         <div class="form-actions">
@@ -94,6 +128,10 @@ import { EmployeeService, CreateEmployeeDTO, UpdateEmployeeDTO } from '../servic
       border: 1px solid #ced4da;
       border-radius: 4px;
       font-size: 1rem;
+    }
+
+    .form-control select {
+      cursor: pointer;
     }
 
     .form-control.is-invalid {
@@ -158,6 +196,21 @@ export class EmployeeFormComponent implements OnInit {
   employeeId: number | null = null;
   loading = false;
   error: string | null = null;
+  fieldErrors: { [key: string]: string[] } = {};
+
+  // Danh sách các phòng ban - có thể mở rộng sau bằng cách lấy từ API
+  departments: string[] = [
+    'IT',
+    'HR',
+    'Finance',
+    'Marketing',
+    'Sales',
+    'Operations',
+    'Customer Service',
+    'Research & Development',
+    'Legal',
+    'Administration'
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -165,11 +218,14 @@ export class EmployeeFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {
+    // Pattern cho phone: chỉ cho phép số, khoảng trắng, dấu gạch ngang, dấu ngoặc đơn, dấu +
+    const phonePattern = /^[0-9+\-\s()]*$/;
+    
     this.employeeForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: [''],
-      department: ['']
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
+      phone: ['', [Validators.maxLength(20), Validators.pattern(phonePattern)]],
+      department: ['', [Validators.maxLength(100)]]
     });
   }
 
@@ -202,47 +258,76 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.employeeForm.valid) {
-      this.loading = true;
-      this.error = null;
+    // Đánh dấu tất cả các field là đã touched để hiển thị lỗi
+    if (this.employeeForm.invalid) {
+      Object.keys(this.employeeForm.controls).forEach(key => {
+        this.employeeForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
 
-      const formValue = this.employeeForm.value;
+    this.loading = true;
+    this.error = null;
+    this.fieldErrors = {}; // Reset field errors
 
-      if (this.isEditMode && this.employeeId) {
-        const updateDto: UpdateEmployeeDTO = {
-          name: formValue.name,
-          email: formValue.email,
-          phone: formValue.phone || undefined,
-          department: formValue.department || undefined
-        };
-        this.employeeService.updateEmployee(this.employeeId, updateDto).subscribe({
-          next: () => {
-            this.router.navigate(['/employees']);
-          },
-          error: (err) => {
-            this.error = 'Failed to update employee';
-            this.loading = false;
-            console.error(err);
-          }
-        });
-      } else {
-        const createDto: CreateEmployeeDTO = {
-          name: formValue.name,
-          email: formValue.email,
-          phone: formValue.phone || undefined,
-          department: formValue.department || undefined
-        };
-        this.employeeService.createEmployee(createDto).subscribe({
-          next: () => {
-            this.router.navigate(['/employees']);
-          },
-          error: (err) => {
-            this.error = 'Failed to create employee';
-            this.loading = false;
-            console.error(err);
-          }
-        });
-      }
+    const formValue = this.employeeForm.value;
+
+    if (this.isEditMode && this.employeeId) {
+      const updateDto: UpdateEmployeeDTO = {
+        name: formValue.name,
+        email: formValue.email,
+        phone: formValue.phone || undefined,
+        department: formValue.department || undefined
+      };
+      this.employeeService.updateEmployee(this.employeeId, updateDto).subscribe({
+        next: () => {
+          this.router.navigate(['/employees']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.handleError(err);
+          this.loading = false;
+        }
+      });
+    } else {
+      const createDto: CreateEmployeeDTO = {
+        name: formValue.name,
+        email: formValue.email,
+        phone: formValue.phone || undefined,
+        department: formValue.department || undefined
+      };
+      this.employeeService.createEmployee(createDto).subscribe({
+        next: () => {
+          this.router.navigate(['/employees']);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.handleError(err);
+          this.loading = false;
+        }
+      });
+    }
+  }
+
+  /**
+   * Xử lý lỗi từ backend và hiển thị theo từng field
+   */
+  private handleError(err: HttpErrorResponse) {
+    this.fieldErrors = {};
+    
+    if (err.status === 400 && err.error?.validationErrors) {
+      // Lỗi validation từ backend - hiển thị theo từng field
+      this.fieldErrors = err.error.validationErrors;
+      this.error = 'Please fix the validation errors below';
+    } else if (err.status === 400 && err.error?.message) {
+      // Lỗi business logic (ví dụ: email đã tồn tại)
+      this.error = err.error.message;
+    } else if (err.status === 403) {
+      this.error = 'Access denied: Only admin users can create employees';
+    } else if (err.status === 409) {
+      // Conflict - email đã tồn tại
+      this.error = err.error?.message || 'Email already exists';
+      this.fieldErrors['email'] = ['Email already exists'];
+    } else {
+      this.error = err.error?.message || 'An error occurred. Please try again.';
     }
   }
 

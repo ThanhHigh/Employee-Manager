@@ -12,6 +12,7 @@ public class EmployeeResponseDTO {
     private String phone;
     private String department;
     private String keycloakUserId;
+    private String createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

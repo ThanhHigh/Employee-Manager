@@ -10,6 +10,7 @@ export interface Employee {
   phone?: string;
   department?: string;
   keycloakUserId?: string;
+  createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
 }

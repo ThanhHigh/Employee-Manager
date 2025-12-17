@@ -39,6 +39,30 @@ public class EmployeeController {
         return ResponseEntity.ok(service.getOwnProfile());
     }
 
+    /**
+     * Tạo nhân viên mới - chỉ admin và staff mới được phép
+     * 
+     * Request body example:
+     * {
+     *   "name": "Nguyen Van A",
+     *   "email": "nguyenvana@example.com",
+     *   "phone": "0123456789",
+     *   "department": "IT"
+     * }
+     * 
+     * Response 201 Created:
+     * {
+     *   "id": 1,
+     *   "name": "Nguyen Van A",
+     *   "email": "nguyenvana@example.com",
+     *   "phone": "0123456789",
+     *   "department": "IT",
+     *   "keycloakUserId": null,
+     *   "createdBy": "keycloak-user-id-123",
+     *   "createdAt": "2024-01-15T10:30:00",
+     *   "updatedAt": "2024-01-15T10:30:00"
+     * }
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('role-admin', 'role-staff')")
     public ResponseEntity<EmployeeResponseDTO> create(@Valid @RequestBody CreateEmployeeDTO dto) {

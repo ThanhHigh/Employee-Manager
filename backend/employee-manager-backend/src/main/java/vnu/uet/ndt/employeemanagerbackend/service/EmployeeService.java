@@ -66,9 +66,27 @@ public class EmployeeService {
         return toResponseDTO(employee);
     }
 
+    /**
+     * Tạo nhân viên mới - chỉ admin và staff mới được phép
+     * Tự động set createdAt và createdBy
+     */
     @Transactional
     public EmployeeResponseDTO create(CreateEmployeeDTO dto) {
+        // Kiểm tra quyền: chỉ admin mới được tạo nhân viên
+        if (!currentUserService.isAdmin() && !currentUserService.isStaff()) {
+            throw new AccessDeniedException("Only admin users or staff users can create employees");
+        }
+
+        // Kiểm tra email đã tồn tại chưa
+        if (repository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email already exists: " + dto.getEmail());
+        }
+
+        // Tạo entity và set các giá trị tự động
         Employee employee = toEntity(dto);
+        employee.setCreatedBy(currentUserService.getCurrentUserId()); // Tự động set createdBy
+        // createdAt sẽ được tự động set bởi @CreationTimestamp
+
         Employee saved = repository.save(employee);
         return toResponseDTO(saved);
     }
@@ -121,6 +139,7 @@ public class EmployeeService {
         dto.setPhone(employee.getPhone());
         dto.setDepartment(employee.getDepartment());
         dto.setKeycloakUserId(employee.getKeycloakUserId());
+        dto.setCreatedBy(employee.getCreatedBy());
         dto.setCreatedAt(employee.getCreatedAt());
         dto.setUpdatedAt(employee.getUpdatedAt());
         return dto;
