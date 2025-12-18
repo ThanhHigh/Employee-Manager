@@ -22,19 +22,19 @@ public class EmployeeController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('role-admin', 'role-staff', 'role-user')")
+    @PreAuthorize("hasAnyRole('hr_staff', 'hr_manager', 'hr_admin')")
     public ResponseEntity<List<EmployeeResponseDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('role-admin', 'role-staff', 'role-user')")
+    @PreAuthorize("hasAnyRole('hr_staff', 'hr_manager', 'hr_admin')")
     public ResponseEntity<EmployeeResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
     @GetMapping("/profile")
-    @PreAuthorize("hasAnyRole('role-admin', 'role-staff', 'role-user')")
+    @PreAuthorize("hasAnyRole('hr_staff', 'hr_manager', 'hr_admin')")
     public ResponseEntity<EmployeeResponseDTO> getOwnProfile() {
         return ResponseEntity.ok(service.getOwnProfile());
     }
@@ -64,14 +64,14 @@ public class EmployeeController {
      * }
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('role-admin', 'role-staff')")
+    @PreAuthorize("hasAnyRole('hr_manager', 'hr_admin')")
     public ResponseEntity<EmployeeResponseDTO> create(@Valid @RequestBody CreateEmployeeDTO dto) {
         EmployeeResponseDTO created = service.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('role-admin', 'role-staff')")
+    @PreAuthorize("hasAnyRole('hr_manager', 'hr_admin')")
     public ResponseEntity<EmployeeResponseDTO> update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateEmployeeDTO dto) {
@@ -79,7 +79,7 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('role-admin')")
+    @PreAuthorize("hasAnyRole('hr_admin')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
