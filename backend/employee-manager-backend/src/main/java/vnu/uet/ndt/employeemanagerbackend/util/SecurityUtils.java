@@ -41,15 +41,19 @@ public class SecurityUtils {
     }
 
     public static boolean isAdmin() {
-        return hasRole("role-admin");
+        return hasRole("hr_admin");
+    }
+
+    public static boolean isManager() {
+        return hasRole("hr_manager");
     }
 
     public static boolean isStaff() {
-        return hasRole("role-staff");
+        return hasRole("hr_staff");
     }
 
     public static boolean isUser() {
-        return hasRole("role-user");
+        return hasRole("role_user");
     }
 }
 

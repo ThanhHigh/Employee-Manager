@@ -24,6 +24,10 @@ public class CurrentUserService {
         return SecurityUtils.isAdmin();
     }
 
+    public boolean isManager() {
+        return SecurityUtils.isManager();
+    }
+
     public boolean isStaff() {
         return SecurityUtils.isStaff();
     }

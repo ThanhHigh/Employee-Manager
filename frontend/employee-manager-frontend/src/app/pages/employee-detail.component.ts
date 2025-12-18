@@ -178,11 +178,11 @@ export class EmployeeDetailComponent implements OnInit {
   }
 
   canEdit(): boolean {
-    return this.keycloakService.isAdmin() || this.keycloakService.isStaff();
+    return this.keycloakService.isAdmin() || this.keycloakService.isStaff() || this.keycloakService.isManager();
   }
 
   canViewList(): boolean {
-    return this.keycloakService.isAdmin() || this.keycloakService.isStaff();
+    return this.keycloakService.isAdmin() || this.keycloakService.isStaff() || this.keycloakService.isManager();
   }
 
   formatDate(dateString: string): string {

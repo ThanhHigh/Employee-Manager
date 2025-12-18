@@ -27,7 +27,7 @@ public class EmployeeService {
         String currentUserId = currentUserService.getCurrentUserId();
         List<Employee> employees;
 
-        if (currentUserService.isAdmin() || currentUserService.isStaff()) {
+        if (currentUserService.isAdmin() || currentUserService.isStaff() || currentUserService.isManager()) {
             // ADMIN and STAFF can see all employees
             employees = repository.findAll();
         } else if (currentUserService.isUser()) {
@@ -67,13 +67,13 @@ public class EmployeeService {
     }
 
     /**
-     * Tạo nhân viên mới - chỉ admin và staff mới được phép
+     * Tạo nhân viên mới - chỉ admin và manager mới được phép
      * Tự động set createdAt và createdBy
      */
     @Transactional
     public EmployeeResponseDTO create(CreateEmployeeDTO dto) {
         // Kiểm tra quyền: chỉ admin mới được tạo nhân viên
-        if (!currentUserService.isAdmin() && !currentUserService.isStaff()) {
+        if (!currentUserService.isAdmin() && !currentUserService.isManager()) {
             throw new AccessDeniedException("Only admin users or staff users can create employees");
         }
 
@@ -93,6 +93,11 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponseDTO update(Long id, UpdateEmployeeDTO dto) {
+        // Kiểm tra quyền: chỉ admin và manager mới được cập nhật nhân viên
+        if (!currentUserService.isAdmin() && !currentUserService.isManager()) {
+            throw new AccessDeniedException("Only admin users or manager users can update employees");
+        }
+
         Employee employee = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found with id: " + id));
         
@@ -115,6 +120,11 @@ public class EmployeeService {
 
     @Transactional
     public void delete(Long id) {
+        // Kiểm tra quyền: chỉ admin mới được xóa nhân viên
+        if (!currentUserService.isAdmin()) {
+            throw new AccessDeniedException("Only admin users can delete employees");
+        }
+
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Employee not found with id: " + id);
         }

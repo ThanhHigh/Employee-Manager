@@ -122,7 +122,7 @@ export class MainLayoutComponent implements OnInit {
   }
 
   canViewEmployees(): boolean {
-    return this.keycloakService.isAdmin() || this.keycloakService.isStaff();
+    return this.keycloakService.isAdmin() || this.keycloakService.isStaff() || this.keycloakService.isManager();
   }
 }
 

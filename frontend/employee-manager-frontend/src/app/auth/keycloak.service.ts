@@ -69,6 +69,7 @@ export class KeycloakService {
 
   getRoles(): string[] {
     if (this.keycloak?.tokenParsed) {
+      console.log('Token parsed:', this.keycloak.tokenParsed);
       const realmAccess = (this.keycloak.tokenParsed as any).realm_access;
       return realmAccess?.roles || [];
     }
@@ -80,15 +81,19 @@ export class KeycloakService {
   }
 
   isAdmin(): boolean {
-    return this.hasRole('role-admin');
+    return this.hasRole('hr_admin');
+  }
+
+  isManager(): boolean {
+    return this.hasRole('hr_manager');
   }
 
   isStaff(): boolean {
-    return this.hasRole('role-staff');
+    return this.hasRole('hr_staff');
   }
 
   isUser(): boolean {
-    return this.hasRole('role-user');
+    return this.hasRole('role_user');
   }
 }
 
