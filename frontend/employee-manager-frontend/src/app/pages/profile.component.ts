@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EmployeeService, Employee } from '../services/employee.service';
 
@@ -99,24 +99,33 @@ export class ProfileComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  constructor(private employeeService: EmployeeService) {}
+  constructor(
+    private employeeService: EmployeeService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.loadProfile();
   }
 
   loadProfile() {
+    console.log('[ProfileComponent] Starting to load profile...');
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
     this.employeeService.getOwnProfile().subscribe({
       next: (employee) => {
+        console.log('[ProfileComponent] Profile data received:', employee);
         this.employee = employee;
         this.loading = false;
+        console.log('[ProfileComponent] Component state - employee:', this.employee, 'loading:', this.loading);
+        this.cdr.detectChanges();
       },
       error: (err) => {
+        console.error('[ProfileComponent] Error loading profile:', err);
         this.error = 'Failed to load profile';
         this.loading = false;
-        console.error(err);
+        this.cdr.detectChanges();
       }
     });
   }

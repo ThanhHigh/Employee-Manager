@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { EmployeeService, Employee } from '../services/employee.service';
@@ -151,7 +151,8 @@ export class EmployeeDetailComponent implements OnInit {
     private employeeService: EmployeeService,
     private keycloakService: KeycloakService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -162,17 +163,23 @@ export class EmployeeDetailComponent implements OnInit {
   }
 
   loadEmployee(id: number) {
+    console.log('[EmployeeDetailComponent] Starting to load employee with id:', id);
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
     this.employeeService.getEmployee(id).subscribe({
       next: (employee) => {
+        console.log('[EmployeeDetailComponent] Employee data received:', employee);
         this.employee = employee;
         this.loading = false;
+        console.log('[EmployeeDetailComponent] Component state - employee:', this.employee, 'loading:', this.loading);
+        this.cdr.detectChanges();
       },
       error: (err) => {
+        console.error('[EmployeeDetailComponent] Error loading employee:', err);
         this.error = 'Failed to load employee';
         this.loading = false;
-        console.error(err);
+        this.cdr.detectChanges();
       }
     });
   }

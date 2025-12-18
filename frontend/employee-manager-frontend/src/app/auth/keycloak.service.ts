@@ -33,7 +33,9 @@ export class KeycloakService {
       
       return this.keycloak.init({
         onLoad: 'login-required',
-        checkLoginIframe: false
+        checkLoginIframe: false,
+        redirectUri: window.location.origin + '/',
+        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
       }).then((authenticated) => {
         console.log('Keycloak initialized. Authenticated:', authenticated);
         console.log('Token:', this.keycloak?.token ? 'EXISTS' : 'MISSING');
@@ -69,7 +71,7 @@ export class KeycloakService {
 
   getRoles(): string[] {
     if (this.keycloak?.tokenParsed) {
-      console.log('Token parsed:', this.keycloak.tokenParsed);
+      // console.log('Token parsed:', this.keycloak.tokenParsed);
       const realmAccess = (this.keycloak.tokenParsed as any).realm_access;
       return realmAccess?.roles || [];
     }
