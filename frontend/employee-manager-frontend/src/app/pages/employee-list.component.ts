@@ -206,8 +206,8 @@ export class EmployeeListComponent implements OnInit {
   }
 
   canCreate(): boolean {
-    // Chỉ admin và staff mới được tạo nhân viên mới
-    return this.keycloakService.isAdmin() || this.keycloakService.isStaff() || this.keycloakService.isManager();
+    // Chỉ admin và manager mới được tạo nhân viên mới
+    return this.keycloakService.isAdmin() || this.keycloakService.isManager();
   }
 
   canEdit(): boolean {

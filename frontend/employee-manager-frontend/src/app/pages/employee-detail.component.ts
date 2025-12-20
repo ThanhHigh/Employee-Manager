@@ -185,7 +185,7 @@ export class EmployeeDetailComponent implements OnInit {
   }
 
   canEdit(): boolean {
-    return this.keycloakService.isAdmin() || this.keycloakService.isStaff() || this.keycloakService.isManager();
+    return this.keycloakService.isAdmin() || this.keycloakService.isManager();
   }
 
   canViewList(): boolean {
